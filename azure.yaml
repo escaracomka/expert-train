@@ -1,0 +1,14 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'windows-latest'  # Menggunakan image Windows untuk Azure-hosted agent
+
+jobs:
+- job: RunInWSL
+  steps:
+    - script: |
+        wsl sudo apt update
+        wsl sudo apt install -y docker.io
+        wsl docker --version
+      displayName: 'Run WSL commands'

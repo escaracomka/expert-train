@@ -35,8 +35,8 @@ jobs:
             Write-Host "WSL status:"
             wsl --status
           }
-          Write-Host "Ubuntu-20.04 is now installed and running."
-        displayName: Install and Verify WSL Ubuntu-20.04
+          Write-Host "Ubuntu-22.04 is now installed and running."
+        displayName: Install and Verify WSL Ubuntu-22.04
 
       # Langkah kedua: Menjalankan skrip di dalam WSL
       - pwsh: |
